@@ -21,7 +21,7 @@ defined('DS') ? DS : define('DS', DIRECTORY_SEPARATOR);
 
 // Load the WP CLI
 if (defined('WP_CLI') && WP_CLI) {
-  require_once(__DIR__.DS.'src'.DS.'KeltieCochrane'.DS.'CriticalCss'.DS.'CriticalCssCli.php');
+  require_once(__DIR__.DS.'src'.DS.'CriticalCssCli.php');
 }
 
 class ThemosisCriticalCss
