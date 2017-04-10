@@ -4,7 +4,7 @@
  * Plugin Name: Themosis Critical CSS
  * Plugin URI: https://keltiecochrane.com
  * Description: A plugin that generates critical CSS on demand.
- * Version: 0.1.4
+ * Version: 0.1.5
  * Author: Daniel Gadd @ Keltie Cochrane Ltd.
  * Author URI: https://keltiecochrane.com
  * Text Domain: themosis-criticalcss.
@@ -17,12 +17,13 @@ use Themosis\Facades\Filter;
 
 defined('DS') ? DS : define('DS', DIRECTORY_SEPARATOR);
 
-// TODO: don't output critical css in plugin, need to hook into batcache to try auto inject it
-
 // Load the WP CLI
 if (defined('WP_CLI') && WP_CLI) {
   require_once(__DIR__.DS.'src'.DS.'CriticalCssCli.php');
 }
+
+// Register our provider
+container()->register(KeltieCochrane\CriticalCss\CriticalCssServiceProvider::class);
 
 class ThemosisCriticalCss
 {
