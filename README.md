@@ -30,10 +30,6 @@ Copy the `config/criticalcss.php` file into your config folder.
 
 Activate the plugin in WordPress.
 
-Add the provder to your config/providers.php file: -
-
-`KeltieCochrane\CriticalCss\CriticalCssServiceProvider::class,`
-
 Use
 ---
 
