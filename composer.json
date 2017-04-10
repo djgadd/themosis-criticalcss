@@ -1,0 +1,35 @@
+{
+  "name": "keltiecochrane/themosis-cache",
+  "description": "A themosis plugin that implements the illuminate/cache packing with a WP_Object_Cache driver",
+  "keywords": ["themosis", "plugin"],
+  "authors": [
+    {
+      "name": "Daniel Gadd",
+      "email": "daniel@djgadd.uk",
+      "homepage": "http://djgadd.uk"
+    },
+    {
+      "name": "Keltie Cochrane Ltd.",
+      "email": "digital@keltiecochrane.com",
+      "homepage": "https://keltiecochrane.com"
+    }
+  ],
+  "type": "wordpress-plugin",
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "https://wpackagist.org"
+    }
+  ],
+  "require": {
+    "php": ">=7.0",
+    "composer/installers": "~1.2",
+    "krisawzm/critical-css": "^2.1",
+    "mobiledetect/mobiledetectlib": "^2.8"
+  },
+  "autoload": {
+    "psr-4": {
+      "KeltieCochrane\\CriticalCss\\": "src/"
+    }
+  }
+}
