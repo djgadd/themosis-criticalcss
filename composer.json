@@ -1,6 +1,6 @@
 {
   "name": "keltiecochrane/themosis-criticalcss",
-  "description": "A themosis plugin that implements the illuminate/cache packing with a WP_Object_Cache driver",
+  "description": "A themosis plugin that generates critical CSS",
   "keywords": ["themosis", "plugin"],
   "authors": [
     {
