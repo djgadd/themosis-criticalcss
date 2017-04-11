@@ -4,7 +4,7 @@
  * Plugin Name: Themosis Critical CSS
  * Plugin URI: https://keltiecochrane.com
  * Description: A plugin that generates critical CSS on demand.
- * Version: 0.1.5
+ * Version: 0.1.6
  * Author: Daniel Gadd @ Keltie Cochrane Ltd.
  * Author URI: https://keltiecochrane.com
  * Text Domain: themosis-criticalcss.
@@ -56,7 +56,7 @@ class ThemosisCriticalCss
     $this->WP_Theme = wp_get_theme();
     Filter::add('style_loader_tag', [$this, 'filter_modifyStyleTags'], 10, 1);
     Action::add('wp_head', [$this, 'action_outputLoadCssToHead']);
-    Action::add('wp_head', [$this, 'action_outputLoadCssToHead']);
+    Action::add('wp_head', [$this, 'action_outputCriticalCss']);
   }
 
   /**
@@ -88,7 +88,7 @@ class ThemosisCriticalCss
   public function action_outputLoadCssToHead()
   {
     // Use loadCSS polyfill, apply a filter to allow this to be disabled
-    if (apply_filters('themosis-criticalcss_useLoadCSS', true)) {
+    if (apply_filters('themosis-criticalcss_useLoadCSS', !$this->cookieIsHit())) {
       require_once __DIR__.DS.'loadCSS.php';
     }
   }
@@ -105,6 +105,7 @@ class ThemosisCriticalCss
 
     if (!$console && !$this->cookieIsHit()) {
       static::setupBrowser();
+      $url = trailingslashit(home_url(add_query_arg(array(),$wp->request)));
 
       if (static::isMobile()) {
         echo container('criticalcss.storage')->css('mobile:'.$url);
@@ -139,6 +140,7 @@ class ThemosisCriticalCss
 
   /**
    * Sets the cookie to the current version of the theme
+   * @method setCookie
    * @param int $expiresOffset
    * @return void
    */
@@ -150,9 +152,10 @@ class ThemosisCriticalCss
 
   /**
    * Sets up a static instance of \Detect\MobileDetect
+   * @method setupBrowser
    * @return void
    */
-  protected static function getBrowser()
+  protected static function setupBrowser()
   {
     if (empty(static::$browser)) {
       static::$browser = new MobileDetect;
@@ -161,6 +164,7 @@ class ThemosisCriticalCss
 
   /**
    * Determines if the browser is a mobile device
+   * @method isMobile
    * @return bool
    */
   public static function isMobile() : bool
@@ -171,6 +175,7 @@ class ThemosisCriticalCss
 
   /**
    * Determines if the browser is a tablet device
+   * @method isMobile
    * @return bool
    */
   public static function isTablet() : bool
@@ -181,6 +186,7 @@ class ThemosisCriticalCss
 
   /**
    * Determines if the browser is a desktop device
+   * @method isDesktop
    * @return bool
    */
   public static function isDesktop() : bool
