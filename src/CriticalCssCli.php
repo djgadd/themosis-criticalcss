@@ -28,6 +28,10 @@ class CriticalCssCli extends WP_CLI_Command
       $cssGenerator = container('criticalcss.cssgenerator');
       $urls = $this->getUrls();
 
+      if (['desktop', 'mobile', 'tablet'] != array_keys($viewports)) {
+        WP_CLI::error('missing viewports, check your config. Desktop, mobile and tablet must be defined.');
+      }
+
       foreach ($urls as $url) {
         try {
           foreach ($viewports as $alias => $viewport) {
