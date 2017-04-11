@@ -31,7 +31,7 @@ return [
         'height' => 1024,
       ],
       // iPad Pro
-      'dekstop' => [
+      'desktop' => [
         'width' => 1024,
         'height' => 1366,
       ],
