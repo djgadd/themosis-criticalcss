@@ -2,16 +2,21 @@
 
 namespace KeltieCochrane\CriticalCss;
 
-use Themosis\Facades\Config;
 use Alfheim\CriticalCss\BladeUtils;
 use Themosis\Foundation\ServiceProvider;
 use KeltieCochrane\CriticalCss\Storage\ThemosisStorage;
 use KeltieCochrane\CriticalCss\HtmlFetchers\ThemosisHtmlFetcher;
 
-use Alfheim\CriticalCss\CssGenerators\CriticalGenerator;
-
 class CriticalCssServiceProvider extends ServiceProvider
 {
+  /**
+   * Defer loading unless we need it, saves us a little bit of overhead if the
+   * current request isn't trying to log anything.
+   *
+   * @var bool
+   */
+  protected $defer = true;
+
   /**
    * {@inheritdoc}
    */
@@ -29,37 +34,42 @@ class CriticalCssServiceProvider extends ServiceProvider
   {
     $this->app->singleton('criticalcss.storage', function ($app) {
       return new ThemosisStorage(
-        Config::get('criticalcss.storage'),
-        container('files'),
-        Config::get('criticalcss.pretend')
+        $app['config']->get('criticalcss.storage'),
+        app('files'),
+        $app['config']->get('criticalcss.pretend')
       );
     });
 
     $this->app->singleton('criticalcss.htmlfetcher', function ($app) {
-      return new ThemosisHtmlFetcher();
+      return new ThemosisHtmlFetcher;
     });
 
     $this->app->singleton('criticalcss.cssgenerator', function ($app) {
+      // We're passing an empty array for the CSS files because we're dynamically
+      // setting files based on $wp_styles queue. This means we can pick up
+      // plugins too, which isn't a use case for KC but may be for others.
       $generator = new CriticalGenerator(
-        array_map(function ($filename) {
-          return themosis_path('theme').'dist'.DS.$filename;
-        }, Config::get('criticalcss.css')),
+        [],
         $app->make('criticalcss.htmlfetcher'),
         $app->make('criticalcss.storage')
       );
 
       $generator->setCriticalBin(
-        Config::get('criticalcss.critical_bin')
+        $app['config']->get('criticalcss.critical_bin')
       );
 
       $generator->setOptions(
-        Config::get('criticalcss.width'),
-        Config::get('criticalcss.height'),
-        Config::get('criticalcss.ignore'),
-        Config::get('criticalcss.timeout', 30000)
+        $app['config']->get('criticalcss.width'),
+        $app['config']->get('criticalcss.height'),
+        $app['config']->get('criticalcss.ignore'),
+        $app['config']->get('criticalcss.timeout', 30000)
       );
 
       return $generator;
+    });
+
+    $this->app->singleton('criticalcss.browser', function ($app) {
+      return new Browser;
     });
   }
 
@@ -72,6 +82,7 @@ class CriticalCssServiceProvider extends ServiceProvider
       'criticalcss.storage',
       'criticalcss.htmlfetcher',
       'criticalcss.cssgenerator',
+      'criticalcss.browser',
     ];
   }
 }

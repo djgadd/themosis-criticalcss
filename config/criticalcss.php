@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Some of the following configuration options are the same as the ones you'll
  * find in the Critical npm package.
@@ -9,16 +10,11 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | CSS file(s)
+    | Viewports
     |--------------------------------------------------------------------------
-    | CSS files to extract from. (The application's main CSS file(s).)
-    |
-    | The file is relative to the theme/dist folder
+    | Only "mobile", "tablet", and "desktop" are supported, but you can change
+    | the dimensions here. We've used some sensible defaults
     */
-    'css' => [
-      'css/main.css',
-    ],
-
     'viewports' => [
       // iPhone 6 Plus
       'mobile' => [
@@ -73,7 +69,7 @@ return [
     |
     | Remember to run `php artisan view:clear` after re-disabling this.
     */
-    'pretend' => (getenv('CRITICALCSS_PRETEND') === 'true' ? true : false),
+    'pretend' => env('CRITICALCSS_PRETEND', false),
 
     /*
     |--------------------------------------------------------------------------
@@ -83,7 +79,7 @@ return [
     | project only, the default should be used. However, if Critical is
     | installed globally, you may simply use 'critical'.
     */
-    'critical_bin' => THEMOSIS_STORAGE.DS.'..'.DS.'node_modules/.bin/critical',
+    'critical_bin' => dirname(themosis_path('storage')).'/node_modules/.bin/critical',
 
     /*
     |--------------------------------------------------------------------------

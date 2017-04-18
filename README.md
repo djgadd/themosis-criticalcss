@@ -3,7 +3,9 @@ Themosis Critical CSS
 
 A WordPress plugin for Themosis that implements
 [kalfheim/critical-css](https://github.com/kalfheim/critical-css) to generate
-critical CSS in WordPress. You'll need to have wp-cli setup to run it.
+critical CSS in WordPress. You'll need to have wp-cli setup to run it, and it'll
+also need to be present in production to new/changed posts. Also relies on `keltiecochrane/themosis-illuminate` implementation of config and files, and uses
+`keltiecochrane/themosis-logger` for logging.
 
 It will generate CSS for mobile, tablet and desktop devices, which will be served
 as appropriate by browser sniffing. It will automatically modify style tags to
