@@ -3,6 +3,7 @@
 namespace KeltieCochrane\CriticalCss;
 
 use WP_Post;
+use Exception;
 use Themosis\Facades\Action;
 use Themosis\Facades\Filter;
 
@@ -182,6 +183,10 @@ class CriticalCss
   {
     $post = get_post($id);
 
+    if (is_null($post)) {
+      throw new Exception(sprintf('get_post returned null for: %s', $id));
+    }
+
     // We only generate critical CSS on published posts
     if ($post->post_status === 'publish') {
       app('log')->debug('Generating CSS for post');
@@ -213,7 +218,11 @@ class CriticalCss
       app('log')->debug('Generating CSS for term');
 
       foreach ($ids as $id) {
-        $this->regenerate(get_term_link($id, $taxonomy));
+        if (is_wp_error($uri = get_term_link(intval($id), $taxonomy))) {
+          throw new Exception($uri->get_error_message(), $uri->get_error_code());
+        }
+
+        $this->regenerate($uri);
       }
     }
   }
@@ -237,7 +246,7 @@ class CriticalCss
    */
   public function action_flushAll()
   {
-    app('log')->debug('Flushing and regenerating all CSS');
+    app('log')->debug('Flushing and regenerating all critical CSS');
     $this->regenerate();
   }
 }

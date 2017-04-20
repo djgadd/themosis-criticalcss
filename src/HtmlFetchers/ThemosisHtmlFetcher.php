@@ -43,7 +43,7 @@ class ThemosisHtmlFetcher implements HtmlFetcherInterface
     $response = $this->call($uri);
 
     if (!$response->isOk()) {
-      app('log')->warning(sprintf('Invalid response when trying to generate critical CSS for [%s]', $uri));
+      app('log')->debug(sprintf('Invalid response (%s) for [%s]', $response->getStatusCode(), $uri));
       throw new HtmlFetchingException(sprintf('Invalid response from URI [%s].', $uri));
     }
 
@@ -101,7 +101,7 @@ class ThemosisHtmlFetcher implements HtmlFetcherInterface
     }
     // Log it then throw it again
     catch (\Throwable $e) {
-      app('log')->warning(sprintf('Error occurred when trying to call [%s]: %s', $uri, $e->getMessage()));
+      app('log')->error(sprintf('Error occurred when trying to call [%s]: %s', $uri, $e->getMessage()));
       throw $e;
     }
   }
