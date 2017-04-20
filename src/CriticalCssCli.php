@@ -105,9 +105,10 @@ class CriticalCssCli extends WP_CLI_Command
       }
     }
     catch (HtmlFetchingException $e) {
-      $this->log('warning', $e->getMessage());
+      $this->log('warning', sprintf('[%s] HtmlFetchingException: %s', $uri, $e->getMessage()));
     }
     catch (NotFoundHttpException $e) {
+      $this->log('warning', sprintf('[%s] NotFoundHttpException: %s', $uri, $e->getMessage()));
       $this->log('warning', $e->getMessage());
     }
   }
@@ -159,7 +160,7 @@ class CriticalCssCli extends WP_CLI_Command
         break;
 
       default:
-        throw new \Exception(sprintf('[%s] is not a valid type of the log method'));
+        throw new \Exception(sprintf('[%s] is not a valid type of log method'));
     }
   }
 
