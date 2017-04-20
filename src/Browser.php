@@ -2,6 +2,7 @@
 
 namespace KeltieCochrane\CriticalCss;
 
+use BadMethodCallException;
 use Detection\MobileDetect;
 
 class Browser
@@ -19,22 +20,20 @@ class Browser
   /**
    * @var \Detection\MobileDetect
    */
-  protected $browser;
+  protected static $mobileDetect;
 
   /**
-   * @var \WP_Theme
-   */
-  protected $WP_Theme;
-
-  /**
-   * Beep boop
+   * Gets the mobile detect instance for us
    *
-   * @return void
+   * @return \Detection\MobileDetect
    */
-  public function __construct()
+  protected static function getMobileDetectInstance() : MobileDetect
   {
-    $this->browser = new MobileDetect;
-    $this->WP_Theme = wp_get_theme();
+    if (is_null(static::$mobileDetect)) {
+      static::$mobileDetect = new MobileDetect;
+    }
+
+    return static::$mobileDetect;
   }
 
   /**
@@ -42,10 +41,10 @@ class Browser
    *
    * @return bool
    */
-  public function isMobile() : bool
+  public static function isMobile() : bool
   {
-    $isMobile = $this->browser->isMobile() && !$this->browser->isTablet();
-    return apply_filters('themosis-criticalcss_isMobile', $isMobile);
+    $mobileDetect = static::getMobileDetectInstance();
+    return $mobileDetect->isMobile() && !$mobileDetect->isTablet();
   }
 
   /**
@@ -53,10 +52,10 @@ class Browser
    *
    * @return bool
    */
-  public function isTablet() : bool
+  public static function isTablet() : bool
   {
-    $isTablet = $this->browser->isTablet();
-    return apply_filters('themosis-criticalcss_isTablet', $isTablet);
+    $mobileDetect = static::getMobileDetectInstance();
+    return $mobileDetect->isTablet();
   }
 
   /**
@@ -64,10 +63,10 @@ class Browser
    *
    * @return bool
    */
-  public function isDesktop() : bool
+  public static function isDesktop() : bool
   {
-    $isDesktop = !$this->browser->isMobile();
-    return apply_filters('themosis-criticalcss_isDesktop', $isDesktop);
+    $mobileDetect = static::getMobileDetectInstance();
+    return !$mobileDetect->isMobile();
   }
 
   /**
@@ -75,7 +74,7 @@ class Browser
    *
    * @return bool
    */
-  public function isWpCli() : bool
+  public static function isWpCli() : bool
   {
     return defined('WP_CLI') && WP_CLI;
   }
@@ -83,41 +82,72 @@ class Browser
   /**
    * Determines if the cookie hit
    *
+   * @param string $version
    * @return bool
    */
-  public function isCookieHit() : bool
+  public static function isCookieHit($version = null) : bool
   {
     $cookieExists = isset($_COOKIE['themosis-criticalcss']);
 
-    if ($cookieExists && $_COOKIE[static::COOKIE_NAME] === $this->WP_Theme->get('Version')) {
-      return apply_filters('themosis-criticalcss_cookieIsHit', true);
+    if (is_null($version)) {
+      $version = wp_get_theme()->get('Version');
+    }
+
+    if ($cookieExists && $_COOKIE[static::COOKIE_NAME] === $version) {
+      return true;
     }
     else {
-      return apply_filters('themosis-criticalcss_cookieIsHit', false);
+      return false;
     }
   }
 
   /**
    * Determines if the cookie missed
    *
+   * @param string $version
    * @return bool
    */
-  public function isCookieMiss() : bool
+  public static function isCookieMiss(string $version = null) : bool
   {
-    return !$this->isCookieHit();
+    return !static::isCookieHit($version);
   }
 
   /**
    * Sets the cookie to the current version of the theme
    *
    * @param int $expiresOffset
+   * @param string $version
    * @return void
    */
-  public function setCookie(int $expiresOffset = null)
+  public function setCookie(int $expiresOffset = null, string $version = null)
   {
+    if (is_null($version)) {
+      $version = wp_get_theme()->get('Version');
+    }
+
     $cookieName = apply_filters('themosis-criticalcss_cookieName', static::COOKIE_NAME);
-    $version = apply_filters('themosis-criticalcss_cssVersion', $this->WP_Theme->get('Version'));
+    $version = apply_filters('themosis-criticalcss_cssVersion', $version);
     $expires = apply_filters('themosis-criticalcss_cookieExpires', time() + ($expiresOffset ?: static::EXPIRES_OFFSET));
     setcookie($cookieName, $version, $expires);
+  }
+
+  /**
+   * Magically maps our calls to the the static methods
+   *
+   * @method isMobile
+   * @method isTablet
+   * @method isDesktop
+   * @param string $method
+   * @param array $args
+   * @return mixed
+   * @throws \BadMethodCallException
+   */
+  public function __call(string $method, array $args = [])
+  {
+    if (method_exists(get_class(), $method)) {
+      return call_user_func_array([get_class(), $method], $args);
+    }
+
+    throw new BadMethodCallException(sprintf('%s method doesn\'t exist', $method));
   }
 }
