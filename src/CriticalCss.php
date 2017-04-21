@@ -23,8 +23,9 @@ class CriticalCss
   {
     // We only want to do stuff if we're not pretending
     if (!app('config')->get('criticalcss.pretend', false)) {
+      $this->browser = app('criticalcss.browser');
+
       if ($this->hasCss()) {
-        $this->browser = app('criticalcss.browser');
         Filter::add('style_loader_tag', [$this, 'filter_modifyStyleTags'], 10, 1);
         Action::add('wp_head', [$this, 'action_outputLoadCssToHead']);
         Action::add('wp_head', [$this, 'action_outputCriticalCss']);
@@ -68,7 +69,15 @@ class CriticalCss
    */
   protected function hasCss() : bool
   {
-    return app('criticalcss.storage')->hasCriticalCss($this->getCurrentUrl());
+    if ($this->browser->isMobile()) {
+      return app('criticalcss.storage')->hasCriticalCss('mobile:'.$this->getCurrentUrl());
+    }
+    elseif ($this->browser->isTablet()) {
+      return app('criticalcss.storage')->hasCriticalCss('tablet:'.$this->getCurrentUrl());
+    }
+    else {
+      return app('criticalcss.storage')->hasCriticalCss('desktop:'.$this->getCurrentUrl());
+    }
   }
 
   /**
