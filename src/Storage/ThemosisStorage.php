@@ -144,16 +144,10 @@ class ThemosisStorage implements StorageInterface
    * Determines whether the given URI has critical CSS
    *
    * @param string $uri
-   * @return string
+   * @return bool
    */
   public function hasCriticalCss(string $uri) : bool
   {
-    foreach (array_keys(app('config')->get('criticalcss.viewports')) as $alias) {
-      if (!$this->files->exists($this->getCssPath(sprintf('%s:%s', $alias, $uri)))) {
-        return false;
-      }
-    }
-
-    return true;
+    return $this->files->exists($this->getCssPath($uri));
   }
 }
