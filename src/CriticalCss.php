@@ -192,8 +192,9 @@ class CriticalCss
   {
     $post = get_post($id);
 
+    // Assume the post has been deleted and do nothing
     if (is_null($post)) {
-      throw new Exception(sprintf('get_post returned null for: %s', $id));
+      return;
     }
 
     // We only generate critical CSS on published posts
