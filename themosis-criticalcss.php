@@ -4,7 +4,7 @@
  * Plugin Name: Themosis Critical CSS
  * Plugin URI: https://keltiecochrane.com
  * Description: A plugin that generates critical CSS on demand.
- * Version: 0.1.6
+ * Version: 0.2.4
  * Author: Daniel Gadd @ Keltie Cochrane Ltd.
  * Author URI: https://keltiecochrane.com
  * Text Domain: themosis-criticalcss.
