@@ -22,6 +22,11 @@ class ThemosisHtmlFetcher implements HtmlFetcherInterface
   protected $app;
 
   /**
+   * @var array
+   */
+  protected $cache;
+
+  /**
    * Create a new instance.
    *
    * @return void
@@ -29,6 +34,7 @@ class ThemosisHtmlFetcher implements HtmlFetcherInterface
   public function __construct()
   {
     $this->app = app();
+    $this->cache = [];
   }
 
   /**
@@ -39,30 +45,34 @@ class ThemosisHtmlFetcher implements HtmlFetcherInterface
   {
     global $wp_styles;
 
-    $cssFiles = [];
-    $response = $this->call($uri);
+    if (!array_key_exists($uri, $this->cache)) {
+      $cssFiles = [];
+      $response = $this->call($uri);
 
-    if (!$response->isOk()) {
-      app('log')->debug(sprintf('Invalid response (%s) for [%s]', $response->getStatusCode(), $uri));
-      throw new HtmlFetchingException(sprintf('Invalid response from URI [%s].', $uri));
+      if (!$response->isOk()) {
+        app('log')->debug(sprintf('Invalid response (%s) for [%s]', $response->getStatusCode(), $uri));
+        throw new HtmlFetchingException(sprintf('Invalid response from URI [%s].', $uri));
+      }
+
+      // Get css files that have been queued for the page
+      if (is_a($wp_styles, WP_Styles::class)) {
+        $cssFiles = array_map(function ($handle) use ($wp_styles) {
+          $dirtyPath = str_replace(WP_HOME.'/content', WP_CONTENT_DIR, $wp_styles->registered[$handle]->src);
+
+          // Do we really need to support windows? idk.
+          return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $dirtyPath);
+        }, $wp_styles->queue);
+      }
+
+      // Tell the generator what CSS files to use
+      app('criticalcss.cssgenerator')->setCssFiles($cssFiles);
+
+      // I don't think we actually need to do this because we shouldn't be outputting
+      // styles when running in the console?
+      $this->cache[$uri] = $response->getContent());
     }
 
-    // Get css files that have been queued for the page
-    if (is_a($wp_styles, WP_Styles::class)) {
-      $cssFiles = array_map(function ($handle) use ($wp_styles) {
-        $dirtyPath = str_replace(WP_HOME.'/content', WP_CONTENT_DIR, $wp_styles->registered[$handle]->src);
-
-        // Do we really need to support windows? idk.
-        return str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $dirtyPath);
-      }, $wp_styles->queue);
-    }
-
-    // Tell the generator what CSS files to use
-    app('criticalcss.cssgenerator')->setCssFiles($cssFiles);
-
-    // I don't think we actually need to do this because we shouldn't be outputting
-    // styles when running in the console?
-    return $this->stripCss($response->getContent());
+    return $this->cache[$uri];
   }
 
   /**
