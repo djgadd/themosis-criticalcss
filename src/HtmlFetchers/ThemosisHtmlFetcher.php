@@ -69,7 +69,7 @@ class ThemosisHtmlFetcher implements HtmlFetcherInterface
 
       // I don't think we actually need to do this because we shouldn't be outputting
       // styles when running in the console?
-      $this->cache[$uri] = $response->getContent());
+      $this->cache[$uri] = $this->stripCss($response->getContent());
     }
 
     return $this->cache[$uri];
